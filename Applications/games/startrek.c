@@ -908,9 +908,9 @@ static void wipe_klingon(struct klingon *k)
 static void phaser_control(void)
 {
 	register int i;
-	int32_t phaser_energy;
+	uint32_t phaser_energy;
 	uint32_t h1;
-	int h;
+	uint32_t h;
 	struct klingon *k = kdata;
 
 	if (inoperable(4))
@@ -942,22 +942,23 @@ static void phaser_control(void)
 	/* We can fire up to nearly 3000 points of energy so we do this
 	   bit in 32bit math */
 
-	if (damage[8] < 0)
-		phaser_energy *= get_rand(100);
+	if (damage[8] < 0) {
+		uint32_t rnd = get_rand(100);
+		phaser_energy *= rnd;
+	}
 	else
-		phaser_energy *= 100;
+		phaser_energy *= 100UL;
 
 	h1 = phaser_energy / klingons;
 
 	for (i = 0; i <= 2; i++) {
 		if (k->energy > 0) {
-			/* We are now 32bit with four digits accuracy */
-			h = h1 * (get_rand(100) + 200);
-			/* Takes us down to 2 digit accuracy */
+			uint32_t rnd = get_rand(100);
+			h = h1 * (rnd + 200UL);
 
-			h /= distance_to(k);
+			h /= (uint32_t)distance_to(k);
 
-			if (h <= 15 * k->energy) {	/* was 0.15 */
+			if (h <= 15UL * k->energy) {	/* was 0.15 */
 				printf("Sensors show no damage to enemy at "
 				       "%d, %d\n\n", k->y, k->x);
 			} else {
@@ -1538,9 +1539,10 @@ static void klingons_shoot(void)
 
 	for (i = 0; i <= 2; i++) {
 		if (k->energy > 0) {
-			h = k->energy * (200 + get_rand(100));
-			h *= 100;	/* Ready for division in fixed */
-			h /= distance_to(k);
+			uint32_t rnd = get_rand(100);
+			h = (uint32_t)k->energy * (200UL + rnd);
+			h *= 100UL;	/* Ready for division in fixed */
+			h /= (uint32_t)distance_to(k);
 			/* Takes us back into FIXED00 */
 			shield = shield - FROM_FIXED00(h);
 
